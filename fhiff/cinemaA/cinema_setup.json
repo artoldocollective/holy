@@ -1,7 +1,7 @@
 {
   "version": 2,
   "kind": "vicico_setup",
-  "createdAt": "2026-04-21T14:49:11.715Z",
+  "createdAt": "2026-04-21T15:40:01.242Z",
   "cinema": {
     "name": "Cinema A",
     "description": "Welcome to the Hermetic International Film Festival 2026!",
@@ -14,29 +14,29 @@
       "frameColor": "#ffffff",
       "cursorColor": "#ffd700",
       "portalTitle": "Cinema B",
-      "portalUrl": "./cinemaB/index.html",
+      "portalUrl": "../cinemaB/index.html",
       "portal2Title": "Cinema C",
-      "portal2Url": "./cinemaC/index.html",
+      "portal2Url": "../cinemaC/index.html",
       "portal3Title": "Cinema D",
-      "portal3Url": "./cinemaD/index.html",
+      "portal3Url": "../cinemaD/index.html",
       "portal4Title": "Cinema E",
-      "portal4Url": "./cinemaE/index.html",
+      "portal4Url": "../cinemaE/index.html",
       "portals": [
         {
           "title": "Cinema B",
-          "url": "./cinemaB/index.html"
+          "url": "../cinemaB/index.html"
         },
         {
           "title": "Cinema C",
-          "url": "./cinemaC/index.html"
+          "url": "../cinemaC/index.html"
         },
         {
           "title": "Cinema D",
-          "url": "./cinemaD/index.html"
+          "url": "../cinemaD/index.html"
         },
         {
           "title": "Cinema E",
-          "url": "./cinemaE/index.html"
+          "url": "../cinemaE/index.html"
         }
       ]
     }
