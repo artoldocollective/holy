@@ -1299,5 +1299,255 @@ document.querySelectorAll('img').forEach((img) => {
   });
 </script>
 
+<script>
+(() => {
+  "use strict";
+
+  // =========================
+  // CONFIG
+  // =========================
+  const CFG = {
+    gumroadUrl: "https://payhip.com/b/MQu2Y",
+    productName: "Welcome to the Hermetic International Film Festival!",
+    title: "Hermetic Film Festival | 2026",
+    subtitle: "Enter your passcode to access.",
+    buyLabel: "Get Ticket",
+    activateLabel: "Enter",
+    placeholder: "Passcode",
+    hint: "",
+    prefixes: ["FHIFF", "HIFF2026"],
+    remember: true,
+    rememberKey: "mdn_serial_ok_v11"
+  };
+
+  // =========================
+  // Helpers
+  // =========================
+  const norm = (s) => (s || "").toUpperCase().replace(/\s+/g, "").replace(/[^A-Z0-9-]/g, "");
+  const ALPHA = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+  function makeChecksum(prefix, body12) {
+    let h = 2166136261 >>> 0;
+    const data = prefix + body12;
+    for (let i = 0; i < data.length; i++) {
+      h ^= data.charCodeAt(i);
+      h = Math.imul(h, 16777619) >>> 0;
+      h ^= (h >>> 13);
+      h = Math.imul(h, 2246822507) >>> 0;
+      h ^= (h >>> 16);
+    }
+    let out = "";
+    for (let i = 0; i < 4; i++) out += ALPHA[(h >>> (i * 7)) & 31];
+    return out;
+  }
+
+  // =========================
+  // Validation (multi-prefix)
+  // =========================
+  function isValidSerial(serialRaw) {
+    const s = norm(serialRaw);
+    const prefixes = CFG.prefixes.map(p => p.toUpperCase());
+
+    for (const p of prefixes) {
+      const re = new RegExp("^" + p + "-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$");
+      if (!re.test(s)) continue;
+
+      const parts = s.split("-");
+      const body12 = parts.slice(1, 4).join("");
+      const check4 = parts[4];
+
+      if (makeChecksum(p, body12) === check4) return true;
+    }
+    return false;
+  }
+
+  function unlock(serial) {
+    document.body.style.display = "block";
+    document.body.dataset.serialOk = "true";
+    document.body.dataset.serial = norm(serial);
+    document.documentElement.classList.remove("mdn-locked");
+    document.body.classList.remove("mdn-locked");
+    if (CFG.remember) {
+      try { localStorage.setItem(CFG.rememberKey, "1"); } catch (_) {}
+    }
+  }
+
+  function isRememberedUnlocked() {
+    if (!CFG.remember) return false;
+    try { return localStorage.getItem(CFG.rememberKey) === "1"; } catch (_) { return false; }
+  }
+
+  // =========================
+  // UI
+  // =========================
+  function mount() {
+    if (isRememberedUnlocked() || document.body?.dataset?.serialOk === "true") return;
+
+    document.documentElement.classList.add("mdn-locked");
+    document.body.classList.add("mdn-locked");
+
+    const style = document.createElement("style");
+    style.textContent = `
+      html.mdn-locked, body.mdn-locked { overflow: hidden !important; }
+      body.mdn-locked > :not(#mdn-serial-modal-root) { pointer-events: none; user-select: none; }
+      #mdn-serial-modal-root{
+        position:fixed; inset:0; z-index:2147483647;
+        display:grid; place-items:center; padding:20px;
+        background: rgba(0,0,0,.35);
+        backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+        opacity:1;
+      }
+      #mdn-serial-modal{
+        width:min(560px,100%);
+        border-radius:26px;
+        background:#ffffff;
+        border:3px solid rgba(0,0,0,.10);
+        box-shadow:0 24px 70px rgba(0,0,0,.22);
+        overflow:hidden;
+        transform: translateY(10px);
+        opacity:0;
+        transition: opacity .22s ease, transform .22s ease;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      }
+      #mdn-serial-modal a {
+      color: #000;    
+      text-decoration: none; 
+      }
+      #mdn-serial-modal a:hover,
+      #mdn-serial-modal a:active,
+      #mdn-serial-modal a:visited {
+      color: #000;
+      text-decoration: none;
+      }
+      #mdn-serial-modal.mdn-in{ transform: translateY(0); opacity:1;}
+      #mdn-top{ padding:26px 26px 12px; }
+      #mdn-title{ margin:0; font-weight:900; font-size:26px; line-height:1.15; letter-spacing:-0.2px; color:#000; }
+      #mdn-sub{ margin:10px 0 0; font-weight:700; font-size:15px; line-height:1.5; color: rgba(0,0,0,.65); }
+      #mdn-body{ padding:0 26px 20px; display:grid; gap:12px; }
+      #mdn-input{ width:100%; box-sizing:border-box; padding:16px 16px; border-radius:18px; border:3px solid rgba(0,0,0,.12); background:#fff; color:#000; font-weight:900; font-size:16px; letter-spacing:.6px; outline:none; margin-bottom:40px;}
+      #mdn-input::placeholder{ color: rgba(0,0,0,.35); font-weight:800; letter-spacing:.2px; }
+      #mdn-input:focus{ border-color: rgba(0,0,0,.55); box-shadow:0 0 0 6px rgba(0,0,0,.08); }
+      #mdn-row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+      .mdn-btn{ appearance:none; border:0; border-radius:18px; padding:14px 16px; cursor:pointer; font-weight:900; font-size:14px; letter-spacing:.2px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none; transition: transform .06s ease, box-shadow .18s ease, background .18s ease; }
+      .mdn-btn:active{ transform: translateY(1px); }
+      .mdn-primary{ background:#000; color:#fff; box-shadow:0 10px 24px rgba(0,0,0,.18); }
+      .mdn-primary:hover{ box-shadow:0 14px 30px rgba(0,0,0,.22); }
+      .mdn-ghost{ background:#fff; color:#000; border:3px solid rgba(0,0,0,.12); }
+      .mdn-ghost:hover{ border-color: rgba(0,0,0,.22); }
+      .mdn-disabled{ opacity:.55; cursor:not-allowed; pointer-events:none; }
+      #mdn-msg{ min-height:20px; font-weight:900; font-size:13px; color: rgba(0,0,0,.60); }
+      #mdn-msg.mdn-bad{ color:#c1121f; }
+      #mdn-msg.mdn-good{ color:#0a7a2f; }
+      #mdn-foot{ padding:14px 26px 22px; border-top:3px solid rgba(0,0,0,.08); display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+      #mdn-hint{ font-weight:900; font-size:13px; color: rgba(0,0,0,.55); }
+      #mdn-close{ background: transparent; border: 3px solid rgba(0,0,0,.10); color:#000; cursor:pointer; font-weight:900; font-size:12px; padding:10px 12px; border-radius:16px; }
+      #mdn-close:hover{ border-color: rgba(0,0,0,.22); }
+      #mdn-serial-modal-root.mdn-out{ opacity:0; transition: opacity .28s ease; }
+    `;
+    document.head.appendChild(style);
+
+    const root = document.createElement("div");
+    root.id = "mdn-serial-modal-root";
+    root.innerHTML = `
+      <div id="mdn-serial-modal" role="dialog" aria-modal="true" aria-labelledby="mdn-title">
+        <div id="mdn-top">
+          <div id="mdn-title">${escapeHtml(CFG.title)}</div>
+          <div id="mdn-sub">${escapeHtml(CFG.subtitle)}</div>
+        </div>
+        <div id="mdn-body">
+          <input id="mdn-input" type="text" inputmode="latin" autocomplete="off" spellcheck="false" placeholder="${escapeHtml(CFG.placeholder)}" />
+          <div id="mdn-row">
+            <button class="mdn-btn mdn-primary" id="mdn-activate" type="button">${escapeHtml(CFG.activateLabel)}</button>
+            <a class="mdn-btn mdn-ghost" id="mdn-buy" href="#" target="_blank" rel="noopener noreferrer">${escapeHtml(CFG.buyLabel)}</a>
+          </div>
+          <div id="mdn-msg">${escapeHtml(CFG.hint)}</div>
+        </div>
+        <div id="mdn-foot">
+          <div id="mdn-hint">${escapeHtml(CFG.productName)}</div>
+          <button id="mdn-close" type="button">Not now</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(root);
+
+    const modal = root.querySelector("#mdn-serial-modal");
+    const input = root.querySelector("#mdn-input");
+    const btnActivate = root.querySelector("#mdn-activate");
+    const buy = root.querySelector("#mdn-buy");
+    const btnClose = root.querySelector("#mdn-close");
+    const msg = root.querySelector("#mdn-msg");
+
+    if (CFG.gumroadUrl && /^https?:\/\//i.test(CFG.gumroadUrl)) {
+      buy.href = CFG.gumroadUrl;
+      buy.classList.remove("mdn-disabled");
+    } else {
+      buy.href = "#";
+      buy.classList.add("mdn-disabled");
+      buy.title = "Add your Gumroad product URL in the config to enable this button.";
+    }
+
+    requestAnimationFrame(() => modal.classList.add("mdn-in"));
+
+    function setMsg(text, cls) {
+      msg.classList.remove("mdn-good","mdn-bad");
+      if(cls) msg.classList.add(cls);
+      msg.textContent = text;
+    }
+
+    function fadeOutAndRemove() {
+      root.classList.add("mdn-out");
+      setTimeout(() => root.remove(), 320);
+    }
+
+function tryActivate() {
+  const val = input.value;
+  if(!val.trim()){ 
+    setMsg("Please enter a password.","mdn-bad"); 
+    input.focus(); 
+    return; 
+  }
+  if(isValidSerial(val)){
+    setMsg("Password accepted. Unlocking…","mdn-good");
+    unlock(val);
+    //  Delay 3 seconds before fading out
+    setTimeout(fadeOutAndRemove, 3000);
+  }else{
+    setMsg("That password doesn’t look valid. Please check and try again.","mdn-bad");
+    input.select();
+  }
+}
+
+    btnActivate.addEventListener("click", tryActivate);
+    input.addEventListener("keydown",(e)=>{ if(e.key==="Enter") tryActivate(); if(e.key==="Escape") setMsg(CFG.hint,null); });
+    btnClose.addEventListener("click",()=>{ setMsg("No problem, take your time.",null); });
+
+    setTimeout(()=>input.focus(),60);
+  }
+
+  function boot(){
+    if(getComputedStyle(document.body).display==="none") document.body.style.display="block";
+    if(isRememberedUnlocked()){ unlock("REMEMBERED"); return; }
+    mount();
+  }
+
+  if(document.readyState==="loading"){ document.addEventListener("DOMContentLoaded",boot,{once:true}); }else{ boot(); }
+
+  window.MandolinSerial = {
+    generateExample(){
+      const prefixes = CFG.prefixes.map(p=>p.toUpperCase());
+      const p = prefixes[0]; // just pick first prefix for example
+      const rnd = ()=>Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g,"").padEnd(4,"A").slice(0,4);
+      const a=rnd(), b=rnd(), c=rnd();
+      const body12=a+b+c;
+      const chk=makeChecksum(p,body12);
+      return `${p}-${a}-${b}-${c}-${chk}`;
+    }
+  };
+
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+})();
+</script>
+
 </body>
 </html>
