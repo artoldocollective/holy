@@ -1464,7 +1464,7 @@ document.querySelectorAll('img').forEach((img) => {
         </div>
         <div id="mdn-foot">
           <div id="mdn-hint">${escapeHtml(CFG.productName)}</div>
-          <button id="mdn-close" type="button">Not now</button>
+          <button id="mdn-close" type="button">?</button>
         </div>
       </div>
     `;
@@ -1483,7 +1483,7 @@ document.querySelectorAll('img').forEach((img) => {
     } else {
       buy.href = "#";
       buy.classList.add("mdn-disabled");
-      buy.title = "Add your Gumroad product URL in the config to enable this button.";
+      buy.title = "Buy Now";
     }
 
     requestAnimationFrame(() => modal.classList.add("mdn-in"));
@@ -1512,14 +1512,14 @@ function tryActivate() {
     //  Delay 3 seconds before fading out
     setTimeout(fadeOutAndRemove, 3000);
   }else{
-    setMsg("That password doesn’t look valid. Please check and try again.","mdn-bad");
+    setMsg("That passcode doesn’t look valid. Please check and try again.","mdn-bad");
     input.select();
   }
 }
 
     btnActivate.addEventListener("click", tryActivate);
     input.addEventListener("keydown",(e)=>{ if(e.key==="Enter") tryActivate(); if(e.key==="Escape") setMsg(CFG.hint,null); });
-    btnClose.addEventListener("click",()=>{ setMsg("No problem, take your time.",null); });
+    btnClose.addEventListener("click",()=>{ setMsg("Tip: Paste your passcode using Ctrl+V (Win/Lin) or Command+V (Mac).",null); });
 
     setTimeout(()=>input.focus(),60);
   }
