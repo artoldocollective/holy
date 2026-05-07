@@ -31,12 +31,12 @@
           "url": "../cinema1/index.html"
         },
         {
-          "title": "Artifashion",
-          "url": "https://artoldo.com/mcqueen/"
+          "title": "Modafy Show",
+          "url": "./raffaela.html"
         },
         {
-          "title": "McQueen",
-          "url": "https://artoldo.com/mcqueen/"
+          "title": "McQueen Show",
+          "url": "./mcqueen.html"
         }
       ]
     }
