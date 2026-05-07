@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <!-- No index / no follow -->
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex" />
+
+  <title translate="no">Artifashion Intelligence - Alexander McQueen</title>
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fullscreen responsive iframe -->
+  <iframe
+    src="https://artoldo.github.io/mcqueen"
+    allowfullscreen
+    loading="eager"
+    referrerpolicy="no-referrer"
+  ></iframe>
+
+  <script>
+    (function () {
+      // Prevent duplicate button
+      if (document.getElementById('hmg-back-btn')) return;
+
+      // Load Google Material Icons
+      const iconLink = document.createElement('link');
+      iconLink.rel = 'stylesheet';
+      iconLink.href = 'https://fonts.googleapis.com/icon?family=Material+Icons';
+      document.head.appendChild(iconLink);
+
+      // Create back button
+      const btn = document.createElement('a');
+      btn.id = 'hmg-back-btn';
+      btn.href = './index.html';
+      btn.setAttribute('translate', 'no');
+      btn.setAttribute('aria-label', 'Back');
+
+      btn.innerHTML = `
+        <span class="material-icons" translate="no">arrow_back</span>
+      `;
+
+      // Styling
+      Object.assign(btn.style, {
+        position: 'fixed',
+        bottom: '20px',
+        left: '20px',
+        zIndex: '10000',
+        width: '56px',
+        height: '56px',
+        borderRadius: '50%',
+        background: 'rgba(0,0,0,0.85)',
+        color: '#fff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textDecoration: 'none',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.35)',
+        cursor: 'pointer',
+        transition: 'transform 0.2s ease, opacity 0.2s ease',
+        opacity: '0.92',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)'
+      });
+
+      // Hover effect
+      btn.onmouseenter = () => {
+        btn.style.transform = 'scale(1.08)';
+        btn.style.opacity = '1';
+      };
+
+      btn.onmouseleave = () => {
+        btn.style.transform = 'scale(1)';
+        btn.style.opacity = '0.92';
+      };
+
+      document.body.appendChild(btn);
+    })();
+  </script>
+
+</body>
+</html>
