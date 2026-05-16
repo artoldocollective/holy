@@ -1,387 +1,967 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="robots" content="index, follow">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Holy Mountain Gallery</title>
-  <meta name="description" content="Art | Cinema | Museum">
-  <meta name="author" content="Holy Mountain Gallery">
-</head>
-<body>
-
+<meta charset="UTF-8">
+<title>Holy Mountain Gallery</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Holy Mountain Gallery">
+<link href="https://fonts.googleapis.com/css2?family=Voltaire&display=swap" rel="stylesheet">
 <style>
-html,body{margin:0;padding:0;height:100%;overflow-x:hidden;overflow-y:auto;background:#000000;}
-#bgCanvas,canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;filter:blur(0px);}
 
-#overlayLayer{
-  position:fixed; inset:0; z-index:5;
-  display:flex; align-items:center; justify-content:center;
-  pointer-events:none; padding:24px; box-sizing:border-box;
-  font-family:'Segoe UI', sans-serif;
-}
-#overlayLayer .overlayWrap{
-  display:flex; flex-direction:column; gap:16px;
-  align-items:center; text-align:center;
-  max-width:min(820px, 92vw);
-}
-.overlayText{
-  font-weight:800; letter-spacing:-0.02em; line-height:1.05;
-  text-shadow: none; background: none;
-  will-change:transform,opacity,filter;
-}
-.overlayCountdown{
-  font-weight:700; letter-spacing:0.02em; line-height:1.15;
-  text-shadow:0 10px 30px rgba(0,0,0,0.38);
-  will-change:transform,opacity,filter;
-}
-.overlayCountdown .cdPrefix{ opacity:0.9; margin-right:0.5em; font-weight:600; letter-spacing:0.03em; }
-.overlayButton{
-  pointer-events:auto;
-  display:inline-flex; align-items:center; justify-content:center;
-  padding:0.9em 1.3em; border-radius:999px; text-decoration:none;
-  font-weight:700; border:1px solid rgba(255,255,255,0.30);
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-  box-shadow:0 16px 40px rgba(0,0,0,0.35);
-  position:relative; overflow:hidden; transform:translateZ(0);
-  will-change:transform,opacity,filter;
-}
-.overlayButton.btn-solid{ background:rgba(255,255,255,0.92); color:#111; border-color:rgba(255,255,255,0.0); }
-.overlayButton.btn-outline{ background:rgba(0,0,0,0.25); color:#fff; }
-.overlayButton.btn-glass{ background:rgba(255,255,255,0.14); color:#fff; }
-
-.anim-text-none{ animation:none; }
-.anim-text-float{ animation:ovFloat 4.2s ease-in-out infinite; }
-.anim-text-fadeup{ animation:ovFadeUp 900ms ease-out both; }
-.anim-text-glow{ animation:ovGlow 2.2s ease-in-out infinite; }
-.anim-text-typewriter{
-  overflow:hidden; white-space:nowrap;
-  border-right:3px solid rgba(255,255,255,0.75);
-  animation: ovTyping 2.8s steps(28,end) 1 both, ovCaret 650ms steps(1,end) infinite;
-  max-width:92vw;
-}
-
-
-.anim-text-slidein{ animation:ovSlideIn 900ms cubic-bezier(.2,.9,.25,1) both; }
-.anim-text-zoomin{ animation:ovZoomIn 820ms cubic-bezier(.2,.9,.25,1) both; }
-.anim-text-blurin{ animation:ovBlurIn 900ms ease-out both; }
-.anim-text-reveal{ animation:ovReveal 950ms ease-out both; }
-
-.ov-loop.anim-text-fadeup{ animation:ovFadeUpLoop 1800ms ease-in-out infinite; }
-.ov-loop.anim-text-slidein{ animation:ovSlideInLoop 2200ms ease-in-out infinite; }
-.ov-loop.anim-text-zoomin{ animation:ovZoomInLoop 2100ms ease-in-out infinite; }
-.ov-loop.anim-text-blurin{ animation:ovBlurInLoop 2200ms ease-in-out infinite; }
-.ov-loop.anim-text-reveal{ animation:ovRevealLoop 2400ms ease-in-out infinite; }
-
-.anim-text-typewriter.tw-js{
-  overflow:visible; white-space:pre-line; border-right:none;
-  animation:none; max-width:min(820px, 92vw);
-}
-.anim-text-typewriter.tw-js .tw-caret{
-  display:inline-block; width:0.1em; height:1em; margin-left:0.08em;
-  background:rgba(255,255,255,0.75);
-  vertical-align:-0.1em;
-  animation:ovCaret 650ms steps(1,end) infinite;
-}
-
-.anim-btn-none{ animation:none; }
-.anim-btn-pop{ animation:ovPop 760ms cubic-bezier(.2,.9,.25,1) both; }
-.anim-btn-pulse{ animation:ovPulse 1.8s ease-in-out infinite; }
-.anim-btn-shimmer::before{
-  content:""; position:absolute; inset:-2px; border-radius:inherit;
-  background:linear-gradient(110deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.35) 40%, rgba(255,255,255,0) 80%);
-  transform:translateX(-120%);
-  animation:ovShimmer 2.2s ease-in-out infinite;
-  pointer-events:none;
-}
-
-
-.anim-btn-slideup{ animation:ovBtnSlideUp 820ms cubic-bezier(.2,.9,.25,1) both; }
-.anim-btn-glow{ animation:ovBtnGlow 1.8s ease-in-out infinite; }
-.anim-btn-wiggle{ animation:ovBtnWiggle 1.2s ease-in-out infinite; }
-.anim-btn-bounce{ animation:ovBtnBounce 1.8s ease-in-out infinite; }
-
-.ov-loop.anim-btn-pop{ animation:ovPopLoop 1900ms ease-in-out infinite; }
-.ov-loop.anim-btn-slideup{ animation:ovBtnSlideUpLoop 2300ms ease-in-out infinite; }
-
-@keyframes ovFloat{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-10px) } }
-@keyframes ovFadeUp{ from{opacity:0; transform:translateY(10px); filter:blur(2px);} to{opacity:1; transform:translateY(0); filter:blur(0);} }
-@keyframes ovGlow{ 0%,100%{ filter:drop-shadow(0 0 0 rgba(255,255,255,0.0)); } 50%{ filter:drop-shadow(0 0 14px rgba(255,255,255,0.55)); } }
-@keyframes ovTyping{ from{ width:0 } to{ width:100% } }
-@keyframes ovCaret{ 50%{ border-color:transparent } }
-@keyframes ovPop{ 0%{opacity:0; transform:translateY(10px) scale(0.96);} 70%{opacity:1; transform:translateY(0) scale(1.02);} 100%{opacity:1; transform:translateY(0) scale(1);} }
-@keyframes ovPulse{ 0%,100%{ transform:scale(1); filter:brightness(1);} 50%{ transform:scale(1.04); filter:brightness(1.12);} }
-@keyframes ovShimmer{ 0%{ transform:translateX(-120%);} 60%{ transform:translateX(120%);} 100%{ transform:translateX(120%);} }
-
-@keyframes ovFadeUpLoop{ 0%,100%{opacity:0; transform:translateY(10px); filter:blur(2px);} 45%{opacity:1; transform:translateY(0); filter:blur(0);} 55%{opacity:1; transform:translateY(0); filter:blur(0);} }
-@keyframes ovSlideIn{ from{opacity:0; transform:translateX(-18px); filter:blur(2px);} to{opacity:1; transform:translateX(0); filter:blur(0);} }
-@keyframes ovSlideInLoop{ 0%,100%{opacity:0; transform:translateX(-18px);} 45%{opacity:1; transform:translateX(0);} 55%{opacity:1; transform:translateX(0);} }
-@keyframes ovZoomIn{ from{opacity:0; transform:scale(0.92); filter:blur(2px);} to{opacity:1; transform:scale(1); filter:blur(0);} }
-@keyframes ovZoomInLoop{ 0%,100%{opacity:0; transform:scale(0.92);} 45%{opacity:1; transform:scale(1);} 55%{opacity:1; transform:scale(1);} }
-@keyframes ovBlurIn{ from{opacity:0; filter:blur(10px); transform:translateY(6px);} to{opacity:1; filter:blur(0); transform:translateY(0);} }
-@keyframes ovBlurInLoop{ 0%,100%{opacity:0; filter:blur(10px); transform:translateY(6px);} 45%{opacity:1; filter:blur(0); transform:translateY(0);} 55%{opacity:1; filter:blur(0); transform:translateY(0);} }
-@keyframes ovReveal{ from{opacity:0; clip-path: inset(0 0 0 100%);} to{opacity:1; clip-path: inset(0 0 0 0);} }
-@keyframes ovRevealLoop{ 0%,100%{opacity:0; clip-path: inset(0 0 0 100%);} 45%{opacity:1; clip-path: inset(0 0 0 0);} 55%{opacity:1; clip-path: inset(0 0 0 0);} }
-@keyframes ovPopLoop{ 0%,100%{opacity:0; transform:translateY(10px) scale(0.96);} 50%{opacity:1; transform:translateY(0) scale(1.02);} 70%{opacity:1; transform:translateY(0) scale(1);} }
-@keyframes ovBtnSlideUp{ from{opacity:0; transform:translateY(14px) scale(0.98);} to{opacity:1; transform:translateY(0) scale(1);} }
-@keyframes ovBtnSlideUpLoop{ 0%,100%{opacity:0; transform:translateY(14px) scale(0.98);} 50%{opacity:1; transform:translateY(0) scale(1);} 70%{opacity:1; transform:translateY(0) scale(1);} }
-@keyframes ovBtnGlow{ 0%,100%{ filter:drop-shadow(0 0 0 rgba(255,255,255,0)); } 50%{ filter:drop-shadow(0 0 16px rgba(255,255,255,0.45)); } }
-@keyframes ovBtnWiggle{ 0%,100%{ transform:rotate(0deg);} 20%{ transform:rotate(-1.8deg);} 40%{ transform:rotate(1.8deg);} 60%{ transform:rotate(-1.2deg);} 80%{ transform:rotate(1.2deg);} }
-@keyframes ovBtnBounce{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-6px);} }
-
-
+                body,
+                h1, h2, h3, h4, h5, h6,
+                .live-heading,
+                .live-subtitle,
+                .live-paragraph,
+                a.uk-button {
+                    font-family: 'Voltaire', sans-serif !important;
+                }
+            
 </style>
 
-<div id="bgCanvas"><canvas id="mainCanvas"></canvas></div>
-<div id="overlayLayer" aria-hidden="false"><div class="overlayWrap"><div id="overlayText" class="overlayText anim-text-typewriter" style="color:#ffffff; font-size:44px;">Holy Mountain Gallery</div><div id="overlayCountdown" class="overlayCountdown anim-text-none" style="color:#ffffff; font-size:28px;"><span class="cdPrefix">Hermetic Film Festival in</span>28:22:40:07</div><a id="overlayButton" class="overlayButton btn-solid anim-btn-pulse" href="https://www.hermeticfilmfestival.com" target="_blank" rel="noopener noreferrer">Learn more</a></div></div>
+<link rel="icon" href="media/favicon.png">
+  <link rel="shortcut icon" href="media/favicon.png">
+<meta property="og:image" content="media/social.jpeg">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.21.6/dist/css/uikit.min.css" />
+<style>
+.live-paragraph { font-size: 1.13rem; max-width: 40em; margin-left:auto; margin-right:auto;}
+
+/* Simple 3-size system for text blocks */
+.live-heading.h-sm { font-size: 2.2rem; line-height: 1.15; }
+.live-heading.h-md { font-size: 3.2rem; line-height: 1.12; }
+.live-heading.h-lg { font-size: 4.2rem; line-height: 1.08; }
+
+.live-subtitle.sub-sm { font-size: 1.1rem; font-weight: 500; }
+.live-subtitle.sub-md { font-size: 1.35rem; font-weight: 500; }
+.live-subtitle.sub-lg { font-size: 1.7rem; font-weight: 500; }
+
+.live-paragraph.p-sm { font-size: 1.0rem; }
+.live-paragraph.p-md { font-size: 1.13rem; }
+.live-paragraph.p-lg { font-size: 1.30rem; }
+
+@media (max-width: 640px) {
+.live-heading.h-lg { font-size: 2.6rem; }
+.live-heading.h-md { font-size: 2.0rem; }
+.live-heading.h-sm { font-size: 1.6rem; }
+
+.live-subtitle.sub-lg { font-size: 1.2rem; }
+.live-subtitle.sub-md { font-size: 1.05rem; }
+.live-subtitle.sub-sm { font-size: 0.95rem; }
+
+.live-paragraph.p-lg { font-size: 1.05rem; }
+.live-paragraph.p-md { font-size: 0.98rem; }
+.live-paragraph.p-sm { font-size: 0.92rem; }
+}
+
+.live-paragraph.uk-text-large { font-size: 1.45rem; }
+@media (max-width: 640px) {
+.live-paragraph { font-size: 1rem;}
+.live-paragraph.uk-text-large { font-size: 1.1rem;}
+}
+/* Make exported images/videos responsive */
+img, video {
+max-width: 100%;
+height: auto;
+display: block;
+}
+
+@media (max-width: 640px) {
+.live-heading, .live-subtitle, .live-paragraph {
+word-break: break-word;
+white-space: normal;
+}
+}
+.navbar-scroll { display:flex; flex-wrap:nowrap; gap:1rem; overflow-x:auto; white-space:nowrap; -webkit-overflow-scrolling:touch; padding:0.5rem 1rem; align-items:center; list-style:none; margin:0; }
+.navbar-scroll a { flex:0 0 auto; text-decoration:none; color:inherit; }
+.navbar-scroll a.uk-active { font-weight:bold; border-bottom:2px solid currentColor; }
+  
+.navbar-logo {
+height: 40px !important;
+width: auto !important;
+max-height: 40px !important;
+object-fit: contain;
+flex-shrink: 0 !important;
+flex-grow: 0 !important;
+}
+
+.navbar-scroll {
+display: flex;
+flex-wrap: nowrap;
+overflow-x: auto;
+-webkit-overflow-scrolling: touch;
+white-space: nowrap;
+gap: 1rem;
+padding: 0.5rem 1rem;
+}
+.navbar-scroll li {
+flex: 0 0 auto;
+list-style: none;
+}
+
+.visually-hidden {
+position: absolute !important;
+width: 1px; height: 1px;
+margin: -1px; padding: 0; border: 0;
+overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
+white-space: nowrap;
+}
+
+:root {
+--navbar-link-color: #000000;
+}
+
+.navbar-scroll::-webkit-scrollbar {
+height: 6px;
+}
+.navbar-scroll::-webkit-scrollbar-thumb {
+background: var(--navbar-link-color);
+border-radius: 3px;
+}
+.navbar-scroll::-webkit-scrollbar-track {
+background: var(--gray, #eee);
+}
+
+
+.navbar-scroll {
+-ms-overflow-style: none;  /* IE & Edge */
+scrollbar-width: none;     /* Firefox */
+}
+.navbar-scroll::-webkit-scrollbar {
+display: none;             /* Chrome, Safari, Opera */
+}
+
+/* ========================================================================
+Button 
+========================================================================== */
+
+/* Primary Button */
+.uk-button-primary {
+background-color: var(--dn-text, #000);
+color: #fff;
+}
+
+/* Primary Button Hover */
+.uk-button-primary:hover {
+background-color: var(--dn-text, #000);
+color: #fff;
+}
+
+/* Primary Button Active */
+.uk-button-primary:active,
+.uk-button-primary.uk-active {
+background-color: var(--dn-text, #000);
+color: #fff;
+}
+
+/* Secondary Button */
+.uk-button-secondary {
+background-color: var(--dn-text, #000);
+color: #fff;
+border: 1px solid transparent;
+}
+
+/* Secondary Button Hover */
+.uk-button-secondary:hover {
+background-color: #fff;
+color: var(--dn-text, #000);
+}
+
+/* Secondary Button Active */
+.uk-button-secondary:active,
+.uk-button-secondary.uk-active {
+background-color: var(--dn-text, #000);
+color: #fff;
+}
+
+/* Contextual Secondary Button Overrides for UIkit Sections/Cards/Overlay */
+.uk-light .uk-button-secondary,
+.uk-section-primary:not(.uk-preserve-color) .uk-button-secondary,
+.uk-section-secondary:not(.uk-preserve-color) .uk-button-secondary,
+.uk-tile-primary:not(.uk-preserve-color) .uk-button-secondary,
+.uk-tile-secondary:not(.uk-preserve-color) .uk-button-secondary,
+.uk-card-primary.uk-card-body .uk-button-secondary,
+.uk-card-primary > :not([class*='uk-card-media']) .uk-button-secondary,
+.uk-card-secondary.uk-card-body .uk-button-secondary,
+.uk-card-secondary > :not([class*='uk-card-media']) .uk-button-secondary,
+.uk-overlay-primary .uk-button-secondary,
+.uk-offcanvas-bar .uk-button-secondary {
+background-color: var(--dn-text, #000);
+color: #fff;
+}
+
+/* ========================================================================
+Links
+========================================================================== */
+
+.uk-link {
+text-decoration: underline;
+cursor: pointer;
+}
+
+.uk-link:hover,
+.uk-link-toggle:hover .uk-link {
+text-decoration: none;
+}
+
+/* ========================================================================
+Lightbox
+========================================================================== */
+
+.uk-lightbox-button {
+box-sizing: border-box;
+width: 50px;
+height: 50px;
+background: rgba(0, 0, 0, 0.3);
+color: rgba(255, 255, 255, 0.7);
+border-radius: 100%;
+/* 1 */
+display: inline-flex;
+justify-content: center;
+align-items: center;
+}
+
+.uk-lightbox-iframe {
+width: 90%;
+height: 90%;
+border: 0px solid black;
+border-radius: 0; /* Default: no rounding for Chrome, Brave, etc. */
+}
+
+/* Safari-only override */
+@supports (-webkit-hyphens: none) and (not (-moz-appearance: none)) {
+.uk-lightbox-iframe {
+border-radius: 25px;
+}
+}
+
+.uk-lightbox-toolbar {
+padding: 5px 5px;
+background: transparent;
+color: rgba(255, 255, 255, 0.7);
+}
+.uk-lightbox-toolbar > * {
+color: rgba(255, 255, 255, 0.7);
+}
+
+.uk-lightbox-toolbar-icon {
+box-sizing: border-box;
+width: 50px;
+height: 50px;
+background: #000;
+color: #fff;
+border-radius: 100%;
+/* 1 */
+display: inline-flex;
+justify-content: center;
+align-items: center;
+}
+
+/* ===== keep only the close button always visible (preserve exact look) ===== */
+
+/* wide selector to match common UIkit close button variants */
+.uk-lightbox .uk-lightbox-button.uk-close,
+.uk-lightbox .uk-lightbox-button.uk-close svg,
+.uk-lightbox .uk-close,
+.uk-lightbox [data-uk-close],
+.uk-lightbox [data-uk-close] > * {
+/* DO NOT change visual properties (width/height/background/color/border-radius/flex)
+— we only override visibility/stacking/interaction and remove hide transforms. */
+position: fixed !important;        /* remove from hidden parent so it stays visible */
+top: 5px !important;               /* align with toolbar padding — preserves placement */
+right: 5px !important;             /* align with toolbar padding */
+z-index: 999999 !important;        /* above overlays */
+display: inline-flex !important;   /* keep your inline-flex layout */
+opacity: 0.7 !important;             /* force fully visible */
+visibility: visible !important;    /* force visible */
+pointer-events: auto !important;   /* clickable even if parent is disabled */
+transform: none !important;        /* cancel hide transforms */
+transition: none !important;       /* prevent fade-out transitions */
+animation: none !important;        /* stop any hiding animations */
+}
+
+/* If UIkit sets helper classes, undo them for close only */
+.uk-lightbox .uk-lightbox-button.uk-close.uk-hidden,
+.uk-lightbox .uk-lightbox-button.uk-close.uk-invisible,
+.uk-lightbox .uk-close.uk-hidden,
+.uk-lightbox .uk-close.uk-invisible,
+.uk-lightbox [data-uk-close].uk-hidden,
+.uk-lightbox [data-uk-close].uk-invisible {
+display: inline-flex !important;
+opacity: 0.7 !important;
+visibility: visible !important;
+pointer-events: auto !important;
+}
+
+/* keep SVG/icon inside intact (do not change color/size) */
+.uk-lightbox .uk-lightbox-button.uk-close svg,
+.uk-lightbox .uk-close svg {
+position: static !important;
+width: auto !important;
+height: auto !important;
+}
+
+/* mobile tweak to avoid overlap while preserving look (keeps same size) */
+@media (max-width: 480px) {
+.uk-lightbox .uk-lightbox-button.uk-close,
+.uk-lightbox .uk-close,
+.uk-lightbox [data-uk-close] {
+top: 8px !important;
+right: 8px !important;
+}
+}
+
+.uk-lightbox,
+.uk-lightbox.uk-open,
+.uk-lightbox .uk-lightbox-items {
+  z-index: 9999 !important; /* or even higher */
+}
+
+/* ========================================================================
+Slider
+========================================================================== */
+
+.uk-slidenav {
+padding: 5px 10px;
+color: rgba(102, 102, 102, 0.5);
+transition: color 0.1s ease-in-out;
+width: 50px;
+height: 50px;
+background: rgba(0, 0, 0, 0.3);
+color: rgba(255, 255, 255, 0.7);
+border-radius: 100%;
+display: inline-flex;
+justify-content: center;
+align-items: center;
+
+}
+
+/* ========================================================================
+Additional CSS:
+========================================================================== */
+
+html {
+-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+button:focus,
+button:active {
+-moz-outline: 0 !important;
+-ms-outline:0 !important;
+-o-outline: 0 !important;
+-webkit-outline: 0 !important;
+}
+
+.uk-border-rounded {
+border-radius: 25px;
+}
+
+/* ============================
+Dynamic Navbar & Mobile Menu
+=========================== */
+
+/* ---------- Mobile + Tablet: up to 1024px ---------- */
+@media (max-width: 1024px) {
+
+  /* --- Navbar container --- */
+  #dynamic-navbar-container,
+  nav.uk-navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* keep logo on left */
+    width: 100%;
+    min-height: 60px;
+    background-color: var(--navbar-bg-color, #fff);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* --- Navbar UL --- */
+  #dynamic-navbar-container ul.navbar-scroll,
+  nav.uk-navbar-container ul.navbar-scroll {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* --- Hide all text links, keep layout --- */
+  #dynamic-navbar-container ul.navbar-scroll a:not(:has(img)),
+  nav.uk-navbar-container ul.navbar-scroll a:not(:has(img)) {
+    visibility: hidden;       /* hides but keeps space */
+    pointer-events: none;     /* prevents clicks */
+    height: 0;                /* optional: collapse vertical space */
+    margin: 0;
+    padding: 0;
+  }
+
+  /* --- Logo link visible --- */
+  #dynamic-navbar-container ul.navbar-scroll a:has(img),
+  nav.uk-navbar-container ul.navbar-scroll a:has(img) {
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* --- Logo image styling --- */
+  #dynamic-navbar-container ul.navbar-scroll a:has(img) img,
+  nav.uk-navbar-container ul.navbar-scroll a:has(img) img {
+    display: block;
+    max-height: 40px;
+    width: auto;
+  }
+
+/* --- Logo image spacing --- */
+#dynamic-navbar-container ul.navbar-scroll a:has(img) img,
+nav.uk-navbar-container ul.navbar-scroll a:has(img) img {
+    display: block;
+    max-height: 40px;
+    width: auto;
+    margin-left: 10px; /* move logo 10px from left without breaking flex alignment */
+}
+
+  /* --- Mobile Menu Toggle (Hamburger) --- */
+  #mobile-menu-toggle {
+    display: flex;
+    position: fixed;
+    top: 12.5px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    isolation: isolate;
+    background: transparent;
+  }
+
+  #mobile-menu-toggle .bar {
+    width: 30px;
+    height: 2px;
+    background-color: var(--navbar-link-color, #000);
+    position: absolute;
+    border-radius: 1px;
+    transition: all 0.4s ease;
+    z-index: 2;
+  }
+
+  #mobile-menu-toggle .bar1 { top: 12px; }
+  #mobile-menu-toggle .bar2 { top: 22px; }
+
+  #mobile-menu-toggle.open .bar1 {
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  #mobile-menu-toggle.open .bar2 {
+    top: 50%;
+    transform: translateY(-50%) rotate(-45deg);
+  }
+
+  /* --- Mobile Menu Panel --- */
+  #mobile-menu {
+    display: none;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    background-color: var(--navbar-bg-color, #fff);
+    color: var(--navbar-text-color, #000);
+    padding: 1rem 0;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    z-index: 9998;
+  }
+
+  #mobile-menu.show {
+    display: flex !important;
+  }
+
+  #mobile-menu a {
+    display: block;
+    width: 100%;
+    box-sizing:border-box;
+    margin: 0.5rem 0;
+    padding: 0.5rem 1.25rem;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    color: var(--navbar-text-color, #000);
+    text-decoration: none;
+    background: transparent;
+  }
+
+  /* Hide logo in mobile menu (optional) */
+  #mobile-menu .navbar-logo { display: none; }
+}
+
+/* ---------- Large screens: 1025px and above ---------- */
+@media (min-width: 1025px) {
+  #mobile-menu-toggle { display: none !important; }
+  #mobile-menu { display: none; }
+
+  /* Navbar container */
+  #dynamic-navbar-container,
+  nav.uk-navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 60px;
+    background-color: var(--navbar-bg-color, #fff);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Navbar links visible */
+  #dynamic-navbar-container ul.navbar-scroll a,
+  nav.uk-navbar-container ul.navbar-scroll a {
+    display: inline-block !important;
+    visibility: visible !important;
+    height: auto !important;
+    margin: initial;
+    padding: initial;
+    text-decoration: none;
+  }
+}
+
+#dynamic-navbar-container .navbar-scroll a:has(img) {
+  text-decoration: none !important;
+  border-bottom: none !important;
+}
+
+/* Prevent underline/bottom-border on logo link in preview/export too */
+nav.uk-navbar-container .navbar-scroll a:has(img),
+.navbar-scroll a:has(img){
+  text-decoration: none !important;
+  border-bottom: none !important; /* overrides .uk-active underline */
+}
+
+/* Hard-kill the bar divider line */
+#editor-dropnavbar.dn-bar,
+.dn-bar{
+  border: 0 !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.accordion-icon {
+  transition: transform 0.2s ease;
+}
+
+/* When accordion item is open */
+.uk-open .accordion-icon {
+  transform: rotate(45deg);
+}
+</style>
+
+
+<link id="custom-font-link" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Voltaire&amp;display=swap">
+<style id="export-font-css">
+                body,
+                h1, h2, h3, h4, h5, h6,
+                .live-heading,
+                .live-subtitle,
+                .live-paragraph,
+                a.uk-button {
+                    font-family: 'Voltaire', sans-serif !important;
+                }
+            </style>
+
+
+</head>
+<body class="uk-background-muted" id="top">
+<h1 id="site-title-h1" class="visually-hidden">Holy Mountain Gallery</h1>
+
+<!-- Mobile Menu (Preview/Export) -->
+<div id="mobile-menu-toggle" aria-label="Toggle mobile menu">
+  <div class="bar bar1"></div>
+  <div class="bar bar2"></div>
+</div>
+<div id="mobile-menu" aria-hidden="true"></div>
 <script>
 (function(){
-  const SETTINGS = {
-    endMs: 1777044360000,
-    total: 60,
-    fmt: "dhms",
-    prefix: "Hermetic Film Festival in",
-    loop: false,
-    revealTextAfter: false,
-    revealButtonAfter: false
-  };
+  var toggle = document.getElementById('mobile-menu-toggle');
+  var menu = document.getElementById('mobile-menu');
+  if (!toggle || !menu) return;
 
-  function startIfReady(){
-    const cdEl = document.getElementById("overlayCountdown") || document.querySelector("#overlayLayer .overlayCountdown");
-    if(!cdEl) return false;
-    if(cdEl.__cdStarted) return true;
-    cdEl.__cdStarted = true;
+  function build(){
+    var nav = document.querySelector('nav.uk-navbar-container ul.navbar-scroll');
+    if (!nav) return;
 
-    const textEl = document.getElementById("overlayText");
-    const btnEl  = document.getElementById("overlayButton");
-
-    const endMs = SETTINGS.endMs;
-    const total = SETTINGS.total;
-    const fmt = SETTINGS.fmt;
-    const prefix = SETTINGS.prefix;
-    const loop = SETTINGS.loop;
-    const revealTextAfter = SETTINGS.revealTextAfter;
-    const revealButtonAfter = SETTINGS.revealButtonAfter;
-
-    function hideGated(){
-      if(revealTextAfter && textEl){ textEl.style.display = "none"; }
-      if(revealButtonAfter && btnEl){ btnEl.style.display = "none"; }
-    }
-    function revealGated(){
-      if(revealTextAfter && textEl){ textEl.style.display = "block"; }
-      if(revealButtonAfter && btnEl){ btnEl.style.display = "inline-flex"; }
-    }
-    hideGated();
-
-    function pad2(n){ return String(Math.max(0, n|0)).padStart(2,"0"); }
-    function format(sec){
-      const s = Math.max(0, sec|0);
-      const days = Math.floor(s / 86400);
-      const hours = Math.floor((s % 86400) / 3600);
-      const mins = Math.floor((s % 3600) / 60);
-      const secs = s % 60;
-      if(fmt === "ms"){ return pad2(Math.floor(s/60)) + ":" + pad2(secs); }
-      if(fmt === "dhms"){ return pad2(days) + ":" + pad2(hours) + ":" + pad2(mins) + ":" + pad2(secs); }
-      const hh = Math.floor(s / 3600);
-      return pad2(hh) + ":" + pad2(mins) + ":" + pad2(secs);
-    }
-
-    function esc(s){
-      return String(s).replace(/[&<>"']/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-    }
-    function render(rem){
-      const p = String(prefix||"").trim();
-      const txt = format(rem);
-      cdEl.innerHTML = p ? ('<span class="cdPrefix">' + esc(p) + '</span>' + esc(txt)) : esc(txt);
-    }
-
-    let baseDur = total;
-    let end = NaN;
-    if(typeof endMs === "number" && Number.isFinite(endMs)){
-      const diff = Math.ceil((endMs - Date.now())/1000);
-      if(diff > 0){
-        baseDur = Math.max(1, diff);
-        end = endMs;
-      } else {
-        end = NaN;
-      }
-    }
-    if(!Number.isFinite(end)){
-      baseDur = total;
-      end = Date.now() + total*1000;
-    }
-
-    let doneCalled = false;
-    function done(){
-      if(!doneCalled){
-        doneCalled = true;
-        revealGated();
-      }
-    }
-
-    let tid = 0;
-    function tick(){
-      let rem = Math.ceil((end - Date.now())/1000);
-      if(rem <= 0){
-        done();
-        if(loop){
-          end = Date.now() + baseDur*1000;
-          rem = Math.ceil((end - Date.now())/1000);
-        } else {
-          render(0);
-          if(tid) clearInterval(tid);
-          return;
-        }
-      }
-      render(rem);
-    }
-
-    tick();
-    tid = setInterval(tick, 250);
-    return true;
+    // Sync colors from navbar (matches app2 behavior)
+    try {
+      var navbarBg = getComputedStyle(nav.parentElement).backgroundColor;
+      var navbarText = getComputedStyle(nav).color;
+      document.documentElement.style.setProperty('--navbar-bg-color', navbarBg);
+      document.documentElement.style.setProperty('--navbar-text-color', navbarText);
+      document.documentElement.style.setProperty('--navbar-link-color', navbarText);
+    } catch(e) {}
+    // Build a simple vertical menu from the navbar links
+    var ul = document.createElement('ul');
+    ul.className = 'uk-nav uk-nav-default';
+    nav.querySelectorAll('li a').forEach(function(a){
+      var li = document.createElement('li');
+      var link = a.cloneNode(true);
+      li.appendChild(link);
+      ul.appendChild(li);
+    });
+    menu.innerHTML = '';
+    menu.appendChild(ul);
   }
 
-  let tries = 0;
-  function retry(){
-    if(startIfReady()) return;
-    tries++;
-    if(tries < 200) setTimeout(retry, 50);
+  function setOpen(state){
+    if (state){
+      build();
+      menu.classList.add('show');
+      menu.setAttribute('aria-hidden','false');
+      toggle.classList.add('open');
+      toggle.setAttribute('aria-expanded','true');
+    } else {
+      menu.classList.remove('show');
+      menu.setAttribute('aria-hidden','true');
+      toggle.classList.remove('open');
+      toggle.setAttribute('aria-expanded','false');
+    }
   }
+  function isOpen(){ return menu.classList.contains('show'); }
 
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", retry, { once:true });
-  }
-  retry();
+  toggle.addEventListener('click', function(){
+    setOpen(!isOpen());
+  });
+
+  // Close on outside click
+  document.addEventListener('click', function(e){
+    if (!isOpen()) return;
+    if (toggle === e.target || toggle.contains(e.target)) return;
+    if (menu.contains(e.target)) return;
+    setOpen(false);
+  });
+
+  // Close on link click
+  menu.addEventListener('click', function(e){
+    var a = e.target && e.target.closest && e.target.closest('a');
+    if (a) setOpen(false);
+  });
+
+  // Rebuild on load (and after global links refresh)
+  window.addEventListener('load', function(){ build(); });
+
+  // Close if resizing up
+  window.addEventListener('resize', function(){
+    if (window.innerWidth > 1024) setOpen(false);
+  });
+
+  // Expose a tiny hook used by global-links loader (safe no-op elsewhere)
+  window.__rebuildMobileMenu = build;
 })();
 </script>
+
+<nav class="uk-navbar-container" style="background:#ffffff;position:sticky;top:0;z-index:999;">
+<ul class="navbar-scroll" uk-scrollspy-nav="closest: a; scroll: true; offset: 100" style="color:#000000;">
+<li><a class="navbar-logo-link" href="#top"><img src="media/logo.png" alt="Holy Mountain Gallery" class="navbar-logo"></a></li><li><a href="https://holymountaingallery.com/">Hermetic Film Festival</a></li><li><a href="https://www.hermeticfilmfestival.com/ticket/" target="_blank" rel="noopener">Get Ticket</a></li><li><a href="https://holymountaingallery.com/fhiff/cinemaA/" target="_blank" rel="noopener">Cinema A</a></li><li><a href="https://holymountaingallery.com/fhiff/cinemaB/" target="_blank" rel="noopener">Cinema B</a></li><li><a href="https://holymountaingallery.com/fhiff/cinemaC/" target="_blank" rel="noopener">Cinema C</a></li><li><a href="https://holymountaingallery.com/fhiff/cinemaD/" target="_blank" rel="noopener">Cinema D</a></li><li><a href="https://holymountaingallery.com/fhiff/cinemaE/" target="_blank" rel="noopener">Cinema E</a></li><li><a href="https://tlk.io/hermeticfilmfestival" target="_blank" rel="noopener">Festival Chat</a></li><li><a href="https://www.hermeticfilmfestival.com/programme" target="_blank" rel="noopener">Programme</a></li>
+</ul>
+</nav>
+
+<section id="section-0" class="uk-section uk-section-primary" uk-height-viewport="offset-top: true" style="background:#000000;min-height:60vh;padding:0;margin:0;">
+
+        <div style="background:#000000; width:100vw; height:100vh; margin:0; padding:0; overflow:hidden;">
+          
+    <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1"
+         uk-slider="autoplay: true; autoplay-interval: 4000; finite: false;"
+         style="background:#000000; width:100vw; height:100vh; overflow:hidden; margin-left:calc(50% - 50vw);">
+      
+
+      <ul class="uk-slider-items uk-child-width-1-1" style="height:100vh; margin:0; padding:0;">
+        
+      <li>
+        <div class="uk-cover-container" style="width:100vw; height:100vh;">
+          <img src="media/mediafile1.jpeg" alt="Hermetic International Film Festival" uk-cover>
+          <div class="uk-position-center uk-text-center uk-padding-small" style="color:#ffffff; z-index:2; text-shadow: 0 2px 12px rgba(0,0,0,.55);">
+           <h2 class="live-heading h-md" style="color:#ffffff; margin:0;">Hermetic International Film Festival (Replay)</h2>
+           <div class="live-paragraph p-md uk-margin-small-top" style="color:#ffffff;">May 1–14 2026</div>
+           <div class="uk-margin-top">
+           <a class="uk-button uk-button-secondary uk-border-rounded" href="https://www.hermeticfilmfestival.com/ticket/" target="_blank" rel="noopener">Get Ticket</a>
+         </div>
+         </div>
+          
+        </div>
+      </li>
+    
+      <li>
+        <div class="uk-cover-container" style="width:100vw; height:100vh;">
+          <img src="media/mediafile2.jpg" alt="Cinema A" uk-cover>
+          <div class="uk-position-center uk-text-center uk-padding-small" style="color:#ffffff; z-index:2; text-shadow: 0 2px 12px rgba(0,0,0,.55);">
+           <h2 class="live-heading h-md" style="color:#ffffff; margin:0;">Cinema A</h2>
+           <div class="live-paragraph p-md uk-margin-small-top" style="color:#ffffff;">A Telephone for God, Against the Waning Light, Archaic, By The Fire, Contact: The Astral Realm, Death....a full stop or just a comma?, Dreamwalker, Fairy Tale, Gnosis, Goddamn it!</div>
+           <div class="uk-margin-top">
+           <a class="uk-button uk-button-secondary uk-border-rounded" href="https://holymountaingallery.com/fhiff/cinemaA/" target="_blank" rel="noopener">Enter</a>
+         </div>
+         </div>
+          
+        </div>
+      </li>
+    
+      <li>
+        <div class="uk-cover-container" style="width:100vw; height:100vh;">
+          <img src="media/mediafile3.jpeg" alt="Cinema B" uk-cover>
+          <div class="uk-position-center uk-text-center uk-padding-small" style="color:#ffffff; z-index:2; text-shadow: 0 2px 12px rgba(0,0,0,.55);">
+           <h2 class="live-heading h-md" style="color:#ffffff; margin:0;">Cinema B</h2>
+           <div class="live-paragraph p-md uk-margin-small-top" style="color:#ffffff;">Happy who the riddle reads, Healing The World - One Human At A Time, I see you, I love you, I feed you, IMAGO, Joy&#39;s Coffee, JUDAS, Lotus-Born Master: Journey To The Other Side Of The Black Hole, Lucifer&#39;s Gala - The Church of Satan 50th Anniversary Conclave Ritual, Lux Vera 6023, Melissa Mari: Musical Alchemist of Stage and Psyche</div>
+           <div class="uk-margin-top">
+           <a class="uk-button uk-button-secondary uk-border-rounded" href="https://holymountaingallery.com/fhiff/cinemaB/" target="_blank" rel="noopener">Enter</a>
+         </div>
+         </div>
+          
+        </div>
+      </li>
+    
+      <li>
+        <div class="uk-cover-container" style="width:100vw; height:100vh;">
+          <img src="media/mediafile4.jpeg" alt="Cinema C" uk-cover>
+          <div class="uk-position-center uk-text-center uk-padding-small" style="color:#ffffff; z-index:2; text-shadow: 0 2px 12px rgba(0,0,0,.55);">
+           <h2 class="live-heading h-md" style="color:#ffffff; margin:0;">Cinema C</h2>
+           <div class="live-paragraph p-md uk-margin-small-top" style="color:#ffffff;">Melodies Of The Abyss 2026, Pale Magic, Psychonaut, Quantum Qi: The Taoist Art of Nurturing Life, Reddening, reEarth ...Rights of Nature, Sumarsólstöður, The Contact, The Deep Dive, The Dreaming Man</div>
+           <div class="uk-margin-top">
+           <a class="uk-button uk-button-secondary uk-border-rounded" href="https://holymountaingallery.com/fhiff/cinemaC/" target="_blank" rel="noopener">Enter</a>
+         </div>
+         </div>
+          
+        </div>
+      </li>
+    
+      <li>
+        <div class="uk-cover-container" style="width:100vw; height:100vh;">
+          <img src="media/mediafile5.jpeg" alt="Cinema D" uk-cover>
+          <div class="uk-position-center uk-text-center uk-padding-small" style="color:#ffffff; z-index:2; text-shadow: 0 2px 12px rgba(0,0,0,.55);">
+           <h2 class="live-heading h-md" style="color:#ffffff; margin:0;">Cinema D</h2>
+           <div class="live-paragraph p-md uk-margin-small-top" style="color:#ffffff;">The Golem of Gabirol, The End of Summer, The Last Fool, The Mermaid Story, The Possession Tape, The Recipe To Save Humanity, The Shaman And Dropout Psychologist, The Shaver Mystery, The Soul of Chivalry, The Steps</div>
+           <div class="uk-margin-top">
+           <a class="uk-button uk-button-secondary uk-border-rounded" href="https://holymountaingallery.com/fhiff/cinemaD/" target="_blank" rel="noopener">Enter</a>
+         </div>
+         </div>
+          
+        </div>
+      </li>
+    
+      <li>
+        <div class="uk-cover-container" style="width:100vw; height:100vh;">
+          <img src="media/mediafile6.jpeg" alt="Cinema E" uk-cover>
+          <div class="uk-position-center uk-text-center uk-padding-small" style="color:#ffffff; z-index:2; text-shadow: 0 2px 12px rgba(0,0,0,.55);">
+           <h2 class="live-heading h-md" style="color:#ffffff; margin:0;">Cinema E</h2>
+           <div class="live-paragraph p-md uk-margin-small-top" style="color:#ffffff;">The Tower Protocol: Resurrection, Thy Kingdom Come, Tony, Touching Infinity, UNO (The End Of Evil), Venus Im Pelz, What happened with Nath_666?, Whirlybird, White Gardenia - John Calvin and Other Excerpts From the King James Bible, Yokoji, La Xaula, Secropolis</div>
+           <div class="uk-margin-top">
+           <a class="uk-button uk-button-secondary uk-border-rounded" href="https://holymountaingallery.com/fhiff/cinemaE/" target="_blank" rel="noopener">Enter</a>
+         </div>
+         </div>
+          
+        </div>
+      </li>
+    
+      </ul>
+
+      
+        <a class="uk-position-center-left uk-position-small uk-hidden-hover" href="#" uk-slidenav-previous uk-slider-item="previous" aria-label="Previous"></a>
+        <a class="uk-position-center-right uk-position-small uk-hidden-hover" href="#" uk-slidenav-next uk-slider-item="next" aria-label="Next"></a>
+      
+
+      <ul class="uk-slider-nav uk-dotnav uk-margin-medium-bottom uk-flex-center uk-position-bottom-center uk-position-small" style="margin:0;"></ul>
+    </div>
+  
+        </div>
+      
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/uikit@3.21.6/dist/js/uikit.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/uikit@3.21.6/dist/js/uikit-icons.min.js"></script>
 <script>
-  const BG_ANIMATION_ENABLED = true;
-  const __raf = window.requestAnimationFrame.bind(window);
-  window.requestAnimationFrame = (cb) => BG_ANIMATION_ENABLED ? __raf(cb) : 0;
-  if(!BG_ANIMATION_ENABLED){ const w=document.getElementById("bgCanvas"); if(w) w.style.display="none"; }
+document.addEventListener('DOMContentLoaded', () => {
+  const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  if (!mobileMenuToggle || !mobileMenu) return;
+
+  // If the lightweight Mobile Menu (Preview/Export) script already initialized,
+  // avoid binding a second controller (prevents open-then-immediate-close).
+  if (typeof window.__rebuildMobileMenu === 'function') return;
+
+  // Detect navbar container dynamically
+  let dynamicNavContainer = document.getElementById('dynamic-navbar-container');
+  if (!dynamicNavContainer) {
+    // fallback for Preview / Export
+    dynamicNavContainer = document.querySelector('nav.uk-navbar-container');
+  }
+  if (!dynamicNavContainer) return; // no navbar found
+
+  let menuBuilt = false;
+
+  // Helpers
+  const isSmallScreen = () => window.innerWidth <= 1024;
+  const isMenuOpen = () => mobileMenu.classList.contains('show');
+
+  const isNavbarEnabled = () => {
+    // Editor: checkbox enabled
+    const enableNavbarCheckbox = document.getElementById('enable-navbar');
+    return enableNavbarCheckbox ? enableNavbarCheckbox.checked : true; // Preview: always enabled
+  };
+
+  // Populate mobile menu
+  function populateMobileMenu(force = false) {
+    if (!force && (menuBuilt || isMenuOpen())) return;
+
+    const nav = dynamicNavContainer.querySelector('ul.navbar-scroll');
+    if (!nav || !mobileMenu) return;
+
+    // Update colors
+    const navbarBg = getComputedStyle(nav.parentElement || nav).backgroundColor;
+    const navbarText = getComputedStyle(nav).color;
+    document.documentElement.style.setProperty('--navbar-bg-color', navbarBg);
+    document.documentElement.style.setProperty('--navbar-text-color', navbarText);
+    document.documentElement.style.setProperty('--navbar-link-color', navbarText);
+
+    const fragment = document.createDocumentFragment();
+    mobileMenu.innerHTML = '';
+
+    nav.querySelectorAll('a').forEach(link => {
+      const clone = link.cloneNode(true);
+      clone.removeAttribute('id');
+
+      clone.addEventListener('click', e => {
+        e.stopPropagation();
+        closeMobileMenu();
+      });
+
+      fragment.appendChild(clone);
+    });
+
+    mobileMenu.appendChild(fragment);
+    menuBuilt = true;
+  }
+
+  // Open / Close Menu
+  function openMobileMenu() {
+    populateMobileMenu(true);
+    mobileMenu.classList.add('show');
+    mobileMenuToggle.classList.add('open');
+    mobileMenu.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeMobileMenu() {
+    mobileMenu.classList.remove('show');
+    mobileMenuToggle.classList.remove('open');
+    mobileMenu.setAttribute('aria-hidden', 'true');
+    setTimeout(() => {
+      menuBuilt = false; // rebuild next time
+    }, 350); // match CSS transition
+  }
+
+  // Update visibility
+  function updateMobileMenuVisibility() {
+    if (isNavbarEnabled() && isSmallScreen()) {
+      mobileMenuToggle.style.display = 'flex';
+    } else {
+      mobileMenuToggle.style.display = 'none';
+      closeMobileMenu();
+    }
+  }
+
+  // MutationObserver to detect dynamic changes in navbar
+  if (dynamicNavContainer) {
+    const observer = new MutationObserver(() => {
+      if (isMenuOpen()) return;
+      menuBuilt = false;
+      populateMobileMenu(true);
+    });
+    observer.observe(dynamicNavContainer, { childList: true, subtree: false });
+  }
+
+  // Events
+  mobileMenuToggle.addEventListener('click', () => {
+    isMenuOpen() ? closeMobileMenu() : openMobileMenu();
+  });
+  window.addEventListener('resize', updateMobileMenuVisibility);
+
+  const enableNavbarCheckbox = document.getElementById('enable-navbar');
+  enableNavbarCheckbox?.addEventListener('change', () => {
+    menuBuilt = false;
+    populateMobileMenu(true);
+    updateMobileMenuVisibility();
+  });
+
+  // Initial setup
+  populateMobileMenu(true);
+  updateMobileMenuVisibility();
+});
 </script>
-<script>let canvas=document.getElementById("mainCanvas"),ctx=canvas.getContext("2d");
-let w=innerWidth,h=innerHeight;
-function resize(){w=innerWidth;h=innerHeight;canvas.width=w;canvas.height=h}
-addEventListener("resize",resize);resize();
 
-const palette=["#bea275","#ffffff","#bea275","#ffffff"].filter(Boolean);
-while(palette.length<4) palette.push(palette[palette.length-1]||"#00ffff");
-const bg="#000000";
-const size=20,speed=1;
+<script>
+(function(){
+  function bind(el){
+    if(!el || el.__boundScrollEnh) return;
+    el.__boundScrollEnh = true;
 
-function hexToRgba(hex,a){if(hex==="transparent") return "rgba(0,0,0,0)";let h=String(hex||"#000000").replace("#","").trim();if(h.length===3) h=h.split("").map(ch=>ch+ch).join("");const n=parseInt(h,16);const r=(n>>16)&255,g=(n>>8)&255,b=n&255;return "rgba(" + r + "," + g + "," + b + "," + a + ")";}
+    // Wheel -> horizontal scroll (mouse wheel support)
+    el.addEventListener('wheel', function(e){
+      // Only convert vertical wheel when horizontal is the intent
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        el.scrollLeft += e.deltaY;
+        e.preventDefault();
+      }
+    }, {passive:false});
 
-function fillBg(alpha){
-  if(bg!=="transparent"){
-    ctx.fillStyle=bg; ctx.fillRect(0,0,w,h);
-    ctx.fillStyle=hexToRgba(bg, alpha); ctx.fillRect(0,0,w,h);
-  }else{
-    ctx.clearRect(0,0,w,h);
-  }
-}
+    // Drag to scroll (mouse/touchpad)
+    var isDown=false, startX=0, startLeft=0, activePointerId=null;
+    el.addEventListener('pointerdown', function(e){
+      // Only for primary button / touch
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
 
-let spacing=0.40;
-let curveAmount=0.20;
-let speedBase=1.35;
-let boldBase=(1.6 + size*0.045);
-const RAILS=12;
-const rotSpeed=0.55;
+      // IMPORTANT: don't hijack clicks on interactive elements inside the scroller
+      // (eg. DropNav parent buttons). Let those receive normal pointer/click events.
+      if (e.target && (e.target.closest('a') || e.target.closest('button') || e.target.closest('input') || e.target.closest('select') || e.target.closest('textarea'))) return;
 
-function curveCenter(t,p){
-  const px=Math.sin(t*0.85)*(w*curveAmount*0.55)+Math.sin(t*1.35+1.1)*(w*curveAmount*0.25)+Math.sin(t*0.32+2.4)*(w*curveAmount*0.20);
-  const py=Math.cos(t*0.65)*(h*curveAmount*0.45)+Math.cos(t*1.10+0.7)*(h*curveAmount*0.22)+Math.cos(t*0.28+1.9)*(h*curveAmount*0.18);
-  return [w*0.5+px*p,h*0.5+py*p];
-}
-function anchorsCircle(x,y,r,phase){
-  const a=new Array(RAILS);
-  for(let i=0;i<RAILS;i++){
-    const ang=(i/RAILS)*Math.PI*2 + phase;
-    a[i]=[x+Math.cos(ang)*r,y+Math.sin(ang)*r];
-  }
-  return a;
-}
-function drawCircle(x,y,r){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.stroke(); }
-function drawSquare(x,y,s,rot){
-  const hs=s*0.5, ca=Math.cos(rot), sa=Math.sin(rot);
-  const pts=[[-hs,-hs],[hs,-hs],[hs,hs],[-hs,hs]].map(([px,py])=>[x+px*ca-py*sa,y+px*sa+py*ca]);
-  ctx.beginPath();
-  ctx.moveTo(pts[0][0],pts[0][1]);
-  ctx.lineTo(pts[1][0],pts[1][1]);
-  ctx.lineTo(pts[2][0],pts[2][1]);
-  ctx.lineTo(pts[3][0],pts[3][1]);
-  ctx.closePath(); ctx.stroke();
-}
-function drawTri(x,y,r,rot){
-  const a0=-Math.PI/2+rot, a1=a0+2.094395102, a2=a0+4.188790205;
-  ctx.beginPath();
-  ctx.moveTo(x+Math.cos(a0)*r,y+Math.sin(a0)*r);
-  ctx.lineTo(x+Math.cos(a1)*r,y+Math.sin(a1)*r);
-  ctx.lineTo(x+Math.cos(a2)*r,y+Math.sin(a2)*r);
-  ctx.closePath(); ctx.stroke();
-}
-function pickShape(p){
-  const band=(Math.floor(p*14)%14);
-  if(band%4===0) return "square";
-  if(band%7===0) return "tri";
-  return "circle";
-}
+      isDown = true;
+      activePointerId = e.pointerId;
+      startX = e.clientX;
+      startLeft = el.scrollLeft;
+      try { el.setPointerCapture(e.pointerId); } catch(_) {}
+      el.classList.add('dragging');
+    });
+    el.addEventListener('pointermove', function(e){
+      if(!isDown || (activePointerId !== null && e.pointerId !== activePointerId)) return;
+      var dx = e.clientX - startX;
+      // Invert so dragging left moves content right
+      el.scrollLeft = startLeft - dx;
+    });
+    function end(e){
+      if(activePointerId !== null && e.pointerId !== activePointerId) return;
+      isDown=false;
+      activePointerId=null;
+      el.classList.remove('dragging');
+      try { el.releasePointerCapture && e.pointerId!=null && el.releasePointerCapture(e.pointerId); } catch(_) {}
+    }
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+    el.addEventListener('pointerleave', end);
 
-const L=[];
-function seed(){
-  L.length=0;
-  const count=Math.max(6,Math.floor(1/spacing));
-  for(let i=0;i<count;i++) L.push({p:i/count,k:i&3});
-}
-seed();
-
-let t0=performance.now();
-function draw(now){
-  const dt=Math.min(50,now-t0); t0=now;
-  const t=now*0.001;
-
-  fillBg(0.10);
-
-  const base=Math.min(w,h)*0.055;
-  const maxSide=Math.min(w,h)*2.9;
-  const dp=(dt*0.00028)*speedBase*speed;
-
-  const frames=[];
-  for(const layer of L){
-    layer.p += dp;
-    if(layer.p>=1){ layer.p-=1; layer.k=(layer.k+1)&3; }
-    const p=layer.p;
-    const side=Math.min(maxSide, base*Math.exp(p*4.2));
-    const [x,y]=curveCenter(t,p);
-    const phase=t*rotSpeed + p*0.9;
-    frames.push({p,k:layer.k,x,y,side,phase,anchors:anchorsCircle(x,y,side*0.5,phase),shape:pickShape(p)});
-  }
-  frames.sort((a,b)=>a.p-b.p);
-
-  for(let i=0;i<frames.length-1;i++){
-    const a=frames[i], b=frames[i+1];
-    ctx.lineWidth = boldBase*(0.65 + b.p*3.1)*0.85;
-    ctx.globalAlpha = Math.min(0.78, 0.07 + b.p*0.90);
-    ctx.strokeStyle = palette[b.k];
-    ctx.beginPath();
-    for(let j=0;j<RAILS;j++){ ctx.moveTo(a.anchors[j][0],a.anchors[j][1]); ctx.lineTo(b.anchors[j][0],b.anchors[j][1]); }
-    ctx.stroke();
+    // Avoid text selection while dragging
+    el.addEventListener('dragstart', function(e){ e.preventDefault(); });
   }
 
-  for(const f of frames){
-    ctx.lineWidth = boldBase*(0.70 + f.p*3.25);
-    ctx.globalAlpha = Math.min(0.95, 0.05 + f.p*1.35);
-    ctx.strokeStyle = palette[f.k];
-    const s=f.side;
-    if(f.shape==="circle") drawCircle(f.x,f.y,s*0.5);
-    else if(f.shape==="square") drawSquare(f.x,f.y,s,f.phase);
-    else drawTri(f.x,f.y,s*0.58,f.phase);
+  function init(){
+    document.querySelectorAll('.dn-scroll, .navbar-scroll').forEach(bind);
   }
 
-  ctx.globalAlpha=1;
-  requestAnimationFrame(draw);
-}
-requestAnimationFrame(draw);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
 </script>
 </body>
 </html>

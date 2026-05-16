@@ -10,10 +10,9 @@
 </head>
 <body>
 
-
 <style>
 html,body{margin:0;padding:0;height:100%;overflow-x:hidden;overflow-y:auto;background:#000000;}
-#bgCanvas,canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;filter:blur(10px);}
+#bgCanvas,canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;filter:blur(0px);}
 
 #overlayLayer{
   position:fixed; inset:0; z-index:5;
@@ -132,16 +131,16 @@ html,body{margin:0;padding:0;height:100%;overflow-x:hidden;overflow-y:auto;backg
 
 
 </style>
-<script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
+
 <div id="bgCanvas"><canvas id="mainCanvas"></canvas></div>
-<div id="overlayLayer" aria-hidden="false"><div class="overlayWrap"><div id="overlayText" class="overlayText anim-text-float" style="color:#ffffff; font-size:44px;">Holy Mountain Gallery</div><div id="overlayCountdown" class="overlayCountdown anim-text-fadeup" style="color:#ffffff; font-size:28px;"><span class="cdPrefix">Exhibtion in</span>47:20:44:50</div></div></div>
+<div id="overlayLayer" aria-hidden="false"><div class="overlayWrap"><div id="overlayText" class="overlayText anim-text-typewriter" style="color:#ffffff; font-size:44px;">Holy Mountain Gallery</div><div id="overlayCountdown" class="overlayCountdown anim-text-none" style="color:#ffffff; font-size:28px;"><span class="cdPrefix">Hermetic Film Festival in</span>28:22:40:07</div><a id="overlayButton" class="overlayButton btn-solid anim-btn-pulse" href="https://www.hermeticfilmfestival.com" target="_blank" rel="noopener noreferrer">Learn more</a></div></div>
 <script>
 (function(){
   const SETTINGS = {
-    endMs: 1783094400000,
+    endMs: 1777044360000,
     total: 60,
     fmt: "dhms",
-    prefix: "Exhibtion in",
+    prefix: "Hermetic Film Festival in",
     loop: false,
     revealTextAfter: false,
     revealButtonAfter: false
@@ -261,10 +260,128 @@ html,body{margin:0;padding:0;height:100%;overflow-x:hidden;overflow-y:auto;backg
   window.requestAnimationFrame = (cb) => BG_ANIMATION_ENABLED ? __raf(cb) : 0;
   if(!BG_ANIMATION_ENABLED){ const w=document.getElementById("bgCanvas"); if(w) w.style.display="none"; }
 </script>
-<script>tsParticles.load("bgCanvas",{fullScreen:{enable:true},background:{color:"#000000"},
-particles:{number:{value:100},color:{value:["#00aaff","#ffaa00","#ff55aa","#55ffaa"]},shape:{type:"circle"},
-opacity:{value:0.6},size:{value:25},move:{enable:true,speed:2}},
-interactivity:{events:{onHover:{enable:true,mode:"repulse"},onClick:{enable:true,mode:"push"}},
-modes:{repulse:{distance:100},push:{quantity:4}}},detectRetina:true});</script>
+<script>let canvas=document.getElementById("mainCanvas"),ctx=canvas.getContext("2d");
+let w=innerWidth,h=innerHeight;
+function resize(){w=innerWidth;h=innerHeight;canvas.width=w;canvas.height=h}
+addEventListener("resize",resize);resize();
+
+const palette=["#bea275","#ffffff","#bea275","#ffffff"].filter(Boolean);
+while(palette.length<4) palette.push(palette[palette.length-1]||"#00ffff");
+const bg="#000000";
+const size=20,speed=1;
+
+function hexToRgba(hex,a){if(hex==="transparent") return "rgba(0,0,0,0)";let h=String(hex||"#000000").replace("#","").trim();if(h.length===3) h=h.split("").map(ch=>ch+ch).join("");const n=parseInt(h,16);const r=(n>>16)&255,g=(n>>8)&255,b=n&255;return "rgba(" + r + "," + g + "," + b + "," + a + ")";}
+
+function fillBg(alpha){
+  if(bg!=="transparent"){
+    ctx.fillStyle=bg; ctx.fillRect(0,0,w,h);
+    ctx.fillStyle=hexToRgba(bg, alpha); ctx.fillRect(0,0,w,h);
+  }else{
+    ctx.clearRect(0,0,w,h);
+  }
+}
+
+let spacing=0.40;
+let curveAmount=0.20;
+let speedBase=1.35;
+let boldBase=(1.6 + size*0.045);
+const RAILS=12;
+const rotSpeed=0.55;
+
+function curveCenter(t,p){
+  const px=Math.sin(t*0.85)*(w*curveAmount*0.55)+Math.sin(t*1.35+1.1)*(w*curveAmount*0.25)+Math.sin(t*0.32+2.4)*(w*curveAmount*0.20);
+  const py=Math.cos(t*0.65)*(h*curveAmount*0.45)+Math.cos(t*1.10+0.7)*(h*curveAmount*0.22)+Math.cos(t*0.28+1.9)*(h*curveAmount*0.18);
+  return [w*0.5+px*p,h*0.5+py*p];
+}
+function anchorsCircle(x,y,r,phase){
+  const a=new Array(RAILS);
+  for(let i=0;i<RAILS;i++){
+    const ang=(i/RAILS)*Math.PI*2 + phase;
+    a[i]=[x+Math.cos(ang)*r,y+Math.sin(ang)*r];
+  }
+  return a;
+}
+function drawCircle(x,y,r){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.stroke(); }
+function drawSquare(x,y,s,rot){
+  const hs=s*0.5, ca=Math.cos(rot), sa=Math.sin(rot);
+  const pts=[[-hs,-hs],[hs,-hs],[hs,hs],[-hs,hs]].map(([px,py])=>[x+px*ca-py*sa,y+px*sa+py*ca]);
+  ctx.beginPath();
+  ctx.moveTo(pts[0][0],pts[0][1]);
+  ctx.lineTo(pts[1][0],pts[1][1]);
+  ctx.lineTo(pts[2][0],pts[2][1]);
+  ctx.lineTo(pts[3][0],pts[3][1]);
+  ctx.closePath(); ctx.stroke();
+}
+function drawTri(x,y,r,rot){
+  const a0=-Math.PI/2+rot, a1=a0+2.094395102, a2=a0+4.188790205;
+  ctx.beginPath();
+  ctx.moveTo(x+Math.cos(a0)*r,y+Math.sin(a0)*r);
+  ctx.lineTo(x+Math.cos(a1)*r,y+Math.sin(a1)*r);
+  ctx.lineTo(x+Math.cos(a2)*r,y+Math.sin(a2)*r);
+  ctx.closePath(); ctx.stroke();
+}
+function pickShape(p){
+  const band=(Math.floor(p*14)%14);
+  if(band%4===0) return "square";
+  if(band%7===0) return "tri";
+  return "circle";
+}
+
+const L=[];
+function seed(){
+  L.length=0;
+  const count=Math.max(6,Math.floor(1/spacing));
+  for(let i=0;i<count;i++) L.push({p:i/count,k:i&3});
+}
+seed();
+
+let t0=performance.now();
+function draw(now){
+  const dt=Math.min(50,now-t0); t0=now;
+  const t=now*0.001;
+
+  fillBg(0.10);
+
+  const base=Math.min(w,h)*0.055;
+  const maxSide=Math.min(w,h)*2.9;
+  const dp=(dt*0.00028)*speedBase*speed;
+
+  const frames=[];
+  for(const layer of L){
+    layer.p += dp;
+    if(layer.p>=1){ layer.p-=1; layer.k=(layer.k+1)&3; }
+    const p=layer.p;
+    const side=Math.min(maxSide, base*Math.exp(p*4.2));
+    const [x,y]=curveCenter(t,p);
+    const phase=t*rotSpeed + p*0.9;
+    frames.push({p,k:layer.k,x,y,side,phase,anchors:anchorsCircle(x,y,side*0.5,phase),shape:pickShape(p)});
+  }
+  frames.sort((a,b)=>a.p-b.p);
+
+  for(let i=0;i<frames.length-1;i++){
+    const a=frames[i], b=frames[i+1];
+    ctx.lineWidth = boldBase*(0.65 + b.p*3.1)*0.85;
+    ctx.globalAlpha = Math.min(0.78, 0.07 + b.p*0.90);
+    ctx.strokeStyle = palette[b.k];
+    ctx.beginPath();
+    for(let j=0;j<RAILS;j++){ ctx.moveTo(a.anchors[j][0],a.anchors[j][1]); ctx.lineTo(b.anchors[j][0],b.anchors[j][1]); }
+    ctx.stroke();
+  }
+
+  for(const f of frames){
+    ctx.lineWidth = boldBase*(0.70 + f.p*3.25);
+    ctx.globalAlpha = Math.min(0.95, 0.05 + f.p*1.35);
+    ctx.strokeStyle = palette[f.k];
+    const s=f.side;
+    if(f.shape==="circle") drawCircle(f.x,f.y,s*0.5);
+    else if(f.shape==="square") drawSquare(f.x,f.y,s,f.phase);
+    else drawTri(f.x,f.y,s*0.58,f.phase);
+  }
+
+  ctx.globalAlpha=1;
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
 </body>
 </html>
